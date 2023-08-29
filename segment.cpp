@@ -1,4 +1,4 @@
-ll segment[4*N];
+ll segment[4*N],Lazy[4*N];
 
 void build(vector<ll>&arr,int low,int high,int ind)
 {
@@ -62,4 +62,43 @@ void update(vector<ll>&arr,int in,ll val,int low,int high,int ind)
 void update(vector<ll>&arr,int in,ll val)
 {
   update(arr,in,val,0,arr.size()-1,0);
+}
+void rangeupdate(int tidx, int lo, int hi, int L, int R, ll val) {
+
+    // Complete any pending updates before entering this node
+    if (Lazy[tidx] != 0) {
+        segment[tidx] = (hi - lo + 1) * Lazy[tidx];
+        if (lo != hi) {
+            Lazy[2 * tidx + 1] += Lazy[tidx];
+            Lazy[2 * tidx + 2] += Lazy[tidx];
+        }
+        Lazy[tidx] = 0;
+    }
+
+    // The Range which we are currently in : [lo, hi]
+    // The Range we have to update for : [L, R]
+
+    // Outside Range
+    if (R < lo || L > hi) return;
+
+    // In Range
+    if (L <= lo && hi <= R) {
+        // Update the Tree's value lazily, and then add update to be done for future to children.
+        segment[tidx] += (hi - lo + 1) * val;
+        if (lo != hi) {
+            Lazy[2 * tidx + 1] += Lazy[tidx];
+            Lazy[2 * tidx + 2] += Lazy[tidx];
+        }
+        return;
+    }
+
+    // Parital Overlap (Go to Left and Right)
+
+    int mid = (lo + hi) / 2;
+    rangeupdate(2 * tidx + 1, lo, mid, L, R, val);
+    rangeupdate(2 * tidx + 2, mid + 1, hi, L, R, val);
+
+    // Update the values once children are updated
+    segment[tidx] = segment[2 * tidx + 1] + segment[2 * tidx + 1];
+
 }
