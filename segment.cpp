@@ -63,6 +63,45 @@ void update(vector<ll>&arr,int in,ll val)
 {
   update(arr,in,val,0,arr.size()-1,0);
 }
+//change update is for changing the values from l to r to a given value
+void changeupdate(int tidx, int lo, int hi, int l, int r, ll k) {
+
+    // Complete any pending updates before entering this node
+    if (Lazy[tidx] != 0) {
+        segment[tidx] = (hi - lo + 1) * Lazy[tidx];
+        if (lo != hi) {
+            Lazy[2 * tidx + 1] += Lazy[tidx];
+            Lazy[2 * tidx + 2] += Lazy[tidx];
+        }
+        Lazy[tidx] = 0;
+    }
+
+    // The Range which we are currently in: [lo, hi]
+    // The Range we have to update for: [l, r]
+
+    // Outside Range
+    if (r < lo || l > hi) return;
+
+    // In Range
+    if (l <= lo && hi <= r) {
+        // Set the entire range to value k
+        segment[tidx] = (hi - lo + 1) * k;
+        if (lo != hi) {
+            Lazy[2 * tidx + 1] = k;
+            Lazy[2 * tidx + 2] = k;
+        }
+        return;
+    }
+
+    // Partial Overlap (Go to Left and Right)
+
+    int mid = (lo + hi) / 2;
+    rangeupdate(2 * tidx + 1, lo, mid, l, r, k);
+    rangeupdate(2 * tidx + 2, mid + 1, hi, l, r, k);
+
+    // Update the values once children are updated
+    segment[tidx] = segment[2 * tidx + 1] + segment[2 * tidx + 2];
+}
 void rangeupdate(int tidx, int lo, int hi, int L, int R, ll val) {
 
     // Complete any pending updates before entering this node
